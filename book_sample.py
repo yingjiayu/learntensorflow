@@ -1,5 +1,9 @@
 import tensorflow as tf
-
+'''
+《TensorFlow：实战Google深度学习框架（第二版）》书中第一个完整案例，位于第四章
+本案例用于学习深度学习框架的基本组成部分，使用了加权和的架构，共三层
+本案例提现了深度学习的目的在于对参数的调整和优化
+'''
 # NumPy是一个科学计算的工具包，这里通过NumPy工具包生成模拟数据集
 from numpy.random import RandomState
 
@@ -66,7 +70,7 @@ with tf.Session() as sess:
         sess.run(train_step,
                  feed_dict={x: X[start:end], y_: Y[start:end]})
         if i % 1000 == 0:
-        # 每隔一段时间计算在所有数据上的交叉熵并输出
+            # 每隔一段时间计算在所有数据上的交叉熵并输出
             total_cross_entropy = sess.run(
                 cross_entropy, feed_dict={x: X, y_: Y}
             )
