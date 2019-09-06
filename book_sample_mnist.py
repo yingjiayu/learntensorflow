@@ -108,6 +108,56 @@ def train(mnist):
     # 又要更新每一个参数的滑动平均值，为了一次完成多个操作，TensorFlow提供了
     # tf.control_dependencies和头tf.group两种机制，下面两行程序和
     # train_op = tf.group(train_step, variables_averages_op)是等价的
+    with tf.control_dependencies([train_step, variables_averages_op]):
+        train_op = tf.no_op(name='train')
+
+    # 校验使用了滑动平均模型的神经网络前向传播结果是否正确
+    correct_prediction = tf.equal(tf.argmax(average_y, 1), tf.argmax(y_, 1))
+
+    # 首先讲一个布尔型的数值转换为实数型，然后平均，这个平均值就是模型在这一组数据上的正确率
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    # 初始化会话开训练
+    with tf.Session() as sess:
+        tf.global_variables_initializer().run()
+        # 准备验证数据，一般在神经网络的训练过程中会通过验证数据来大致判断停止的条件和评判训练的效果
+
+        validate_feed = {x: mnist.validation.images,
+                         y_: mnist.validation.labels}
+        # 准备测试数据，此数据用来作为模型优劣的最后评价标准
+        test_feed = {x: mnist.test.images,
+                     y_: mnist.test.labels}
+        # 迭代训练神经网络
+        for i in range(TRAINING_STEPS):
+            # 每1000轮输出一次在验证数据集上的测试结果
+            if i % 1000 == 0:
+                # batch太大或者太小都会导致训练时间过长
+                validate_acc = sess.run(accuracy, feed_dict=validate_feed)
+                print("After %d training step(s), validation accuracy"
+                      "using average model is %g" % (i, validate_acc))
+
+            # 产生这一轮使用的一次batch的训练数据，并运行训练过程
+            xs, ys = mnist.train.next_bacth(BATCH_SIZE)
+            sess.run(train_op, feed_dict={x: xs, y_: ys})
+
+        # 训练结束之后，在测试数据上检测神经网络模型的最终正确率
+        test_acc = sess.run(accuracy, feed_dict=test_feed)
+        print("After %d training step(s),test accuracy using average model is %g" % (TRAINING_STEPS, test_acc))
+
+
+# 主程序入口
+def main(argv=None):
+    # 声明处理MNIST数据集的类，这个类在初始化时会自动下载数据
+    mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
+    train(mnist)
+
+
+# TensorFlow提供的一个主程序入口，tf.app.run会调用上面定义的main函数
+if __name__ == '__main__':
+    tf.app.run()
+
+
+
 
 
 
