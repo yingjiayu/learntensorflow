@@ -1,4 +1,6 @@
 import tensorflow as tf
+old_v = tf.logging.get_verbosity()
+tf.logging.set_verbosity(tf.logging.ERROR)
 from tensorflow.examples.tutorials.mnist import input_data
 '''
 《TensorFlow：实战Google深度学习框架（第二版）》书中第二个完整案例，位于第五章
@@ -76,7 +78,7 @@ def train(mnist):
 
     # 计算使用了滑动平均之后的前向传播结果。滑动平均不会改变变量本身的取值，而是会维护一个影子
     # 变量来记录其滑动平均值。所以当需要使用这个滑动平均值时，需要明确调用average函数
-    average_y = inference(x, variable_averages, weights2, biases1, weights2, biases2)
+    average_y = inference(x, variable_averages, weights1, biases1, weights2, biases2)
 
     # 计算交叉熵作为刻画预测值和真实值之间差距的损失函数，这里使用了TensorFlow 中提供的
     # sparse_softmax_cross_entroy_with_logits函数来计算交叉熵，分类问题中只有一个正确答案时，
@@ -137,7 +139,7 @@ def train(mnist):
                       "using average model is %g" % (i, validate_acc))
 
             # 产生这一轮使用的一次batch的训练数据，并运行训练过程
-            xs, ys = mnist.train.next_bacth(BATCH_SIZE)
+            xs, ys = mnist.train.next_batch(BATCH_SIZE)
             sess.run(train_op, feed_dict={x: xs, y_: ys})
 
         # 训练结束之后，在测试数据上检测神经网络模型的最终正确率
@@ -149,6 +151,7 @@ def train(mnist):
 def main(argv=None):
     # 声明处理MNIST数据集的类，这个类在初始化时会自动下载数据
     mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
+    tf.logging.set_verbosity(old_v)
     train(mnist)
 
 
