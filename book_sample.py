@@ -24,11 +24,11 @@ y_ = tf.placeholder(tf.float32, shape=(None, 1), name='y-input')
 # 定义神经网络前向传播的过程
 a = tf.matmul(x, w1)
 y = tf.matmul(a, w2)
-
+y = tf.sigmoid(y)
 
 # 步骤二：定义损失函数和反向传播的算法
 # s型函数 值域0到1 二分法常用
-y = tf.sigmoid(y)
+
 # 交叉熵 clip_by_value：取第一个参数的范围，log：取自然对数（以无理数e为底的幂的反运算）reduce_mean：平均值
 cross_entropy = -tf.reduce_mean(
     y_ * tf.log(tf.clip_by_value(y, 1e-10, 1.0))
